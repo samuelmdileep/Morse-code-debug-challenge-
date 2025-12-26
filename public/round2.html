@@ -3,256 +3,197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
   <title>Round 2 | Audio Morse</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
-
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
-    :root{
-      --purple:#8B6AAF;
-      --pink:#D4789C;
-      --text:#6A5A7A;
-      --border:#DBCDF0;
-      --green:#5A8A7A;
-      --bg1:#FDFCFA; --bg2:#FAEDCB; --bg3:#F2C6DE; --bg4:#DBCDF0; --bg5:#C6DEF1;
+    body {
+      font-family: "Space Mono", monospace;
+      background: #0b1020;
+      color: #e6eef8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
     }
-
-    body{
-      margin:0;
-      font-family:"Space Mono",monospace;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
-      color:var(--text);
-      overflow-x:hidden;
+    .card {
+      background: linear-gradient(180deg,#0f1724,#071028);
+      border-radius: 10px;
+      padding: 24px;
+      width: 420px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
     }
-
-    .hackher-header{
-      position:fixed; top:0; left:0; right:0;
-      height:72px; padding:0 32px;
-      display:flex; align-items:center; justify-content:space-between;
-      background:rgba(253,252,250,.9);
-      backdrop-filter:blur(12px);
-      border-bottom:2px solid var(--border);
-      z-index:100;
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    p { margin: 8px 0 16px; color: #bcd3f0; }
+    .controls { display:flex; gap:8px; margin-bottom:12px; }
+    button {
+      background:#1f6feb;
+      color:white;
+      border:0;
+      padding:10px 14px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:700;
     }
-    .nav-left img{height:48px}
-
-    main{
-      max-width:700px;
-      margin:0 auto;
-      padding:120px 20px;
-    }
-
-    .round-box{
-      padding:30px;
-      background:rgba(255,255,255,0.65);
-      border:1px solid var(--border);
-      border-radius:14px;
-      box-shadow:0 10px 25px rgba(0,0,0,0.05);
-    }
-
-    h2{
-      text-align:center;
-      color:var(--purple);
-      font-size:30px;
+    button.secondary { background:#2b394f; }
+    input[type="text"] {
+      width:100%;
+      padding:10px;
+      border-radius:6px;
+      border:1px solid #203040;
+      background:#071226;
+      color:#e6eef8;
+      box-sizing:border-box;
       margin-bottom:12px;
     }
-
-    .timer-bar{
-      text-align:center;
-      font-size:20px;
-      font-weight:700;
-      color:var(--purple);
-      margin-bottom:20px;
-    }
-
-    .play-btn{
-      width:100%;
-      padding:14px;
-      margin-top:10px;
-      border:2px solid var(--purple);
-      background:#fff;
-      color:var(--purple);
-      font-weight:700;
-      border-radius:10px;
-      cursor:pointer;
-      transition:.2s;
-    }
-    .play-btn:hover{
-      background:var(--purple); color:#fff;
-    }
-
-    .answer-input{
-      width:100%;
-      padding:14px;
-      margin-top:20px;
-      border-radius:10px;
-      border:2px solid var(--border);
-      font-family:"Space Mono",monospace;
-      font-size:18px;
-      outline:none;
-      text-transform:uppercase;
-    }
-
-    .submit-btn{
-      width:100%;
-      padding:14px;
-      margin-top:22px;
-      border:2px solid #000;
-      background:#fff;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:18px;
-      font-weight:700;
-    }
-    .submit-btn:hover{
-      background:#000; color:#fff;
-    }
+    .hint { font-size:12px; color:#8fa8d6; margin-bottom:8px; }
+    .status { font-size:13px; color:#9fe3a6; min-height:18px; }
   </style>
 </head>
-
 <body>
-
-<header class="hackher-header">
-  <div class="nav-left">
-    <img src="hackher 1.png" alt="HackHER Logo">
-  </div>
-</header>
-
-<main>
-
-  <div class="timer-bar">⏱ <span id="timer">00:00</span></div>
-
-  <div class="round-box">
-    <h2>$ Round 2 – Audio Morse</h2>
-
+  <main class="card" role="main">
+    <h1>Round 2 – Audio Morse</h1>
     <p>Listen to the Morse code and type the decoded word below.</p>
 
-    <!-- AUDIO -->
-    <audio id="morseAudio" src="audio/power.mp3"></audio>
+    <!-- Audio element (hidden controls) -->
+    <audio id="morseAudio" preload="auto">
+      <!-- Replace src with your actual audio file path -->
+      <source src="audio/morse-round2.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
 
-    <button id="playBtn" class="play-btn">▶ PLAY AUDIO</button>
+    <!-- Controls and inputs with matching IDs used by the script -->
+    <div class="controls">
+      <button id="playButton" type="button">▶ PLAY AUDIO</button>
+      <button id="pauseButton" type="button" class="secondary">⏸ PAUSE</button>
+      <button id="replayButton" type="button" class="secondary">↺ REPLAY</button>
+    </div>
 
-    <input type="text" id="answerInput" class="answer-input" placeholder="TYPE YOUR ANSWER (eg : TOWER)" />
+    <div class="hint">TYPE YOUR ANSWER (eg : TOWER)</div>
+    <input id="answerInput" type="text" placeholder="Type your answer here" autocomplete="off" />
+    <div style="display:flex; gap:8px;">
+      <button id="submitButton" type="button">SUBMIT →</button>
+      <button id="clearButton" type="button" class="secondary">CLEAR</button>
+    </div>
 
-    <button id="submitBtn" class="submit-btn">SUBMIT →</button>
-  </div>
+    <div class="status" id="statusMessage" aria-live="polite"></div>
+  </main>
 
-</main>
+  <script>
+    // Run after DOM is ready to avoid null element references
+    document.addEventListener("DOMContentLoaded", () => {
+      // Grab elements safely
+      const playBtn = document.getElementById("playButton");
+      const pauseBtn = document.getElementById("pauseButton");
+      const replayBtn = document.getElementById("replayButton");
+      const submitBtn = document.getElementById("submitButton");
+      const clearBtn = document.getElementById("clearButton");
+      const answerInput = document.getElementById("answerInput");
+      const status = document.getElementById("statusMessage");
+      const audio = document.getElementById("morseAudio");
 
-<script type="module">
-window.addEventListener("DOMContentLoaded", () => {
-
-  /* FIREBASE */
-  import { auth, db } from "./firebase.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-  import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-  let userUID = null;
-
-  /* ---------------- BLOCK REFRESH / BACK ---------------- */
-  function blockUnload(e){
-    e.preventDefault();
-    e.returnValue = "";
-  }
-  window.addEventListener("beforeunload", blockUnload);
-
-  history.pushState(null,null,location.href);
-  window.onpopstate = () => { history.go(1); alert("Back navigation is disabled!"); };
-
-
-  /* ---------------- FIREBASE PROTECT ---------------- */
-  onAuthStateChanged(auth, async(user)=>{
-    if(!user){ location.href="login.html"; return; }
-
-    userUID = user.uid;
-
-    const snap = await getDoc(doc(db,"scores",userUID));
-    if (snap.exists() && snap.data().level2?.started){
-      alert("Round 2 already started!");
-      window.removeEventListener("beforeunload", blockUnload);
-      location.href="round3.html";
-      return;
-    }
-
-    await setDoc(doc(db,"scores",userUID),{
-      level2:{ started: Date.now() }
-    },{ merge:true });
-  });
-
-  /* ---------------- TIMER ---------------- */
-  let sec=0;
-  let interval=setInterval(()=>{
-    sec++;
-    timer.innerText =
-      `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-  },1000);
-
-  function stopTimer(){ clearInterval(interval); return sec; }
-
-  /* ---------------- AUDIO LOGIC ---------------- */
-  const audio = document.getElementById("morseAudio");
-  const playBtn = document.getElementById("playBtn");
-
-  let isLocked = false;
-
-  audio.addEventListener("ended", () => {
-    isLocked = false;
-    playBtn.innerText = "▶ PLAY AGAIN";
-    playBtn.style.opacity = "1";
-  });
-
-  playBtn.onclick = () => {
-    if (isLocked){
-      alert("Replay after audio finishes!");
-      return;
-    }
-
-    isLocked = true;
-    audio.currentTime = 0;
-
-    audio.play().then(()=>{
-      playBtn.innerText = "▶ PLAYING...";
-      playBtn.style.opacity = "0.6";
-    });
-  };
-
-  /* ---------------- SUBMIT ---------------- */
-  submitBtn.onclick = async()=>{
-    const typed = answerInput.value.trim().toUpperCase();
-    if (!typed){ alert("Enter your decoded answer!"); return; }
-
-    const correct = "POWER";
-    const totalTime = stopTimer();
-
-    await setDoc(doc(db,"scores",userUID),{
-      level2:{
-        typed,
-        correct:(typed===correct),
-        score:(typed===correct?1:0),
-        timeTaken:totalTime,
-        submittedAt:Date.now()
+      // Defensive checks: if any required element is missing, log and stop
+      if (!audio) {
+        console.error("Audio element not found. Make sure #morseAudio exists.");
+        if (status) status.textContent = "Audio element missing.";
+        return;
       }
-    },{ merge:true });
 
-    window.removeEventListener("beforeunload", blockUnload);
-    location.href = "round3.html";
-  };
+      // Helper to update status text
+      function setStatus(text, isError = false) {
+        if (status) {
+          status.textContent = text;
+          status.style.color = isError ? "#ff8a8a" : "#9fe3a6";
+        }
+      }
 
-});
-</script>
+      // Play audio
+      if (playBtn) {
+        playBtn.addEventListener("click", () => {
+          audio.play().then(() => {
+            setStatus("Playing audio...");
+          }).catch(err => {
+            console.error("Playback failed:", err);
+            setStatus("Playback failed. Check audio file or browser autoplay settings.", true);
+          });
+        });
+      }
 
-<script>
-  /* MOBILE AUDIO UNLOCK */
-  document.addEventListener("touchstart", () => {
-    const a = document.getElementById("morseAudio");
-    a.muted = false;
-    a.play().catch(()=>{});
-    a.pause();
-    a.currentTime = 0;
-  }, { once:true });
-</script>
+      // Pause audio
+      if (pauseBtn) {
+        pauseBtn.addEventListener("click", () => {
+          audio.pause();
+          setStatus("Paused.");
+        });
+      }
 
+      // Replay from start
+      if (replayBtn) {
+        replayBtn.addEventListener("click", () => {
+          audio.currentTime = 0;
+          audio.play().then(() => setStatus("Replaying audio..."))
+            .catch(err => {
+              console.error("Replay failed:", err);
+              setStatus("Replay failed.", true);
+            });
+        });
+      }
+
+      // Submit answer
+      if (submitBtn && answerInput) {
+        submitBtn.addEventListener("click", () => {
+          const answer = answerInput.value.trim();
+          if (!answer) {
+            setStatus("Please enter an answer before submitting.", true);
+            return;
+          }
+          // Example validation: uppercase and simple check
+          const normalized = answer.toUpperCase();
+          // Replace the expectedAnswer with your actual expected value or server check
+          const expectedAnswer = "TOWER";
+          if (normalized === expectedAnswer) {
+            setStatus("Correct! Well done.");
+          } else {
+            setStatus("Incorrect. Try again.", true);
+          }
+        });
+      }
+
+      // Clear input
+      if (clearBtn && answerInput) {
+        clearBtn.addEventListener("click", () => {
+          answerInput.value = "";
+          setStatus("");
+          answerInput.focus();
+        });
+      }
+
+      // Optional: keyboard submit on Enter
+      if (answerInput) {
+        answerInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (submitBtn) submitBtn.click();
+          }
+        });
+      }
+
+      // Audio ended event
+      audio.addEventListener("ended", () => {
+        setStatus("Audio ended.");
+      });
+
+      // If audio fails to load, show message
+      audio.addEventListener("error", (e) => {
+        console.error("Audio error event:", e);
+        setStatus("Failed to load audio. Check the file path.", true);
+      });
+
+      // Focus input for convenience
+      if (answerInput) answerInput.focus();
+    });
+  </script>
 </body>
 </html>
