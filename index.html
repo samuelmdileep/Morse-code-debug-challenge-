@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Morse Quest | HackHER Pre-Event</title>
+   <link rel="icon" type="image/png" href="hackher 1.png">
 
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
@@ -55,12 +56,33 @@
 
     .cmd{text-align:left;color:var(--green);margin-bottom:32px}
 
-    .logo-wrap{overflow-x:auto;margin-bottom:24px}
+    .logo-wrap {
+  overflow-x: hidden !important;
+}
+/* Hide scrollbar inside elements (Chrome/Safari/Edge) */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar in Firefox */
+* {
+  scrollbar-width: none;
+}
     .hackher-ascii{
-      font-weight:700;line-height:1.1;text-align:center;
-      color:var(--purple);white-space:pre;
-      font-size:clamp(.6rem,1.4vw,2rem);margin:0;
-    }
+  font-weight:700;
+  line-height:1.1;
+  text-align:center;
+  color:var(--purple);
+
+  white-space:pre-wrap;     /* same look, but wraps instead of scrolling */
+  overflow-x:hidden;        /* prevent scrollbar */
+  display:block;
+
+  font-size:clamp(.6rem,1.4vw,2rem);
+  margin:0 auto;            /* keep centered visually */
+  max-width:100%;           /* ensures no horizontal overflow */
+}
+
 
     .subtitle{color:var(--pink);letter-spacing:2px;font-weight:700;margin-bottom:40px}
 
