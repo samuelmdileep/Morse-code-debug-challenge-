@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <title>Round 2 | Audio Morse</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
@@ -142,18 +142,10 @@
 
 </main>
 
-<!-- SCRIPT MUST BE AT END (IMPORTANT FOR VERCEL) -->
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
   import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-  /* Elements */
-  const audio = document.getElementById("morseAudio");
-  const playBtn = document.getElementById("playBtn");
-  const answerInput = document.getElementById("answerInput");
-  const submitBtn = document.getElementById("submitBtn");
-  const timerText = document.getElementById("timer");
 
   let userUID = null;
 
@@ -198,7 +190,7 @@
   let sec=0;
   let interval=setInterval(()=>{
     sec++;
-    timerText.innerText =
+    timer.innerText =
       `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
   },1000);
 
@@ -207,6 +199,7 @@
   /* ---------------- AUDIO REPLAY LOCK ---------------- */
 
   let isLocked = false;
+  const audio = document.getElementById("morseAudio");
 
   audio.addEventListener("ended", () => {
     isLocked = false;
@@ -218,11 +211,13 @@
     if (isLocked) return alert("Replay after audio finishes!");
 
     isLocked = true;
+    audio.pause();
     audio.currentTime = 0;
-    audio.play();
 
-    playBtn.innerText = "▶ PLAYING...";
-    playBtn.style.opacity = "0.6";
+    audio.play().then(()=>{
+      playBtn.innerText = "▶ PLAYING...";
+      playBtn.style.opacity = "0.6";
+    });
   };
 
   /* ---------------- SUBMIT ---------------- */
@@ -246,9 +241,23 @@
 
     window.removeEventListener("beforeunload", blockUnload);
 
-    location.href = "round3.html";
-  };
+  // ALWAYS GO NEXT ROUND
+  location.href = "round3.html";
+};
 </script>
+<script>
+  // unlock audio on first user tap (MOBILE FIX)
+  document.addEventListener("touchstart", () => {
+    const a = document.getElementById("morseAudio");
+    if (a) {
+      a.muted = false;
+      a.play().catch(()=>{});
+      a.pause();
+      a.currentTime = 0;
+    }
+  }, { once:true });
+</script>
+
 
 </body>
 </html>
