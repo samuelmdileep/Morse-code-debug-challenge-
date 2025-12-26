@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Morse Quest | HackHER Pre-Event</title>
-   <link rel="icon" type="image/png" href="hackher 1.png">
+  <link rel="icon" type="image/png" href="hackher 1.png">
 
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
@@ -16,12 +15,20 @@
       --text:#6A5A7A; --border:#DBCDF0;
     }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:"Space Mono",monospace;
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:"Space Mono",monospace;
       background:linear-gradient(180deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
-      color:var(--text); overflow-x:hidden;
+      color:var(--text);
+      overflow-x:hidden !important;       /* prevent any horizontal scrollbar */
+      width:100%;
     }
+
+    /* Hide scrollbar globally */
+    *::-webkit-scrollbar { display:none; }
+    * { scrollbar-width:none; }
 
     /* ===== HEADER ===== */
     .hackher-header{
@@ -31,7 +38,6 @@
       backdrop-filter:blur(12px); border-bottom:2px solid var(--border);
       z-index:100;
     }
-
     .nav-left img{height:48px}
     .nav-center{font-size:14px;color:#9B7BB8}
     .nav-center a{text-decoration:none;color:var(--text);margin:0 6px}
@@ -48,7 +54,9 @@
     .register-btn span{color:var(--green)}
     .register-btn:hover{transform:scale(1.05)}
 
-    @media(max-width:900px){.nav-center{display:none}}
+    @media(max-width:900px){
+      .nav-center{display:none}
+    }
 
     /* ===== MAIN ===== */
     main{
@@ -59,34 +67,31 @@
     .cmd{text-align:left;color:var(--green);margin-bottom:32px}
 
     .logo-wrap {
-  overflow-x: hidden !important;
-}
-/* Hide scrollbar inside elements (Chrome/Safari/Edge) */
-*::-webkit-scrollbar {
-  display: none;
-}
+      overflow-x:hidden !important;
+      width:100%;
+    }
 
-/* Hide scrollbar in Firefox */
-* {
-  scrollbar-width: none;
-}
-    .hackher-ascii{
-  font-weight:700;
-  line-height:1.1;
-  text-align:center;
-  color:var(--purple);
+    /* FINAL OVERFLOW-PROOF ASCII */
+    .hackher-ascii {
+      font-weight:700;
+      line-height:1.1;
+      text-align:center;
+      color:var(--purple);
 
-  white-space:pre-wrap;     /* same look, but wraps instead of scrolling */
-  overflow-x:hidden;        /* prevent scrollbar */
-  display:block;
+      white-space:pre-wrap;        /* wrap ASCII */
+      word-break:break-word;       /* break long blocks */
+      overflow-wrap:break-word;    /* enhanced wrap */
+      overflow-x:hidden !important;
 
-  font-size:clamp(.6rem,1.4vw,2rem);
-  margin:0 auto;            /* keep centered visually */
-  max-width:100%;           /* ensures no horizontal overflow */
-}
+      display:block;
+      font-size:clamp(.6rem,1.4vw,2rem);
+      margin:0 auto;
+      max-width:100%;
+    }
 
-
-    .subtitle{color:var(--pink);letter-spacing:2px;font-weight:700;margin-bottom:40px}
+    .subtitle{
+      color:var(--pink);letter-spacing:2px;font-weight:700;margin-bottom:40px;
+    }
 
     .terminal-box{
       max-width:720px;margin:0 auto 40px;
@@ -98,8 +103,10 @@
     .action a{
       padding:14px 30px;border-radius:12px;border:2px solid #000;
       text-decoration:none;color:#000;font-weight:700;transition:.2s;
+      display:inline-block;
     }
     .action a:hover{background:#000;color:#fff}
+
   </style>
 </head>
 
@@ -151,4 +158,3 @@
 
 </body>
 </html>
-
