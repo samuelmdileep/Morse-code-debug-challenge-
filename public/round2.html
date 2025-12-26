@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <title>Round 2 | Audio Morse</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
@@ -130,7 +130,7 @@
     <p>Listen to the Morse code and type the decoded word below.</p>
 
     <!-- AUDIO -->
-    <audio src="audio/power.mp3"></audio>
+    <audio id="morseAudio" src="audio/power.mp3"></audio>
 
     <button id="playBtn" class="play-btn">▶ PLAY AUDIO</button>
 
@@ -142,10 +142,18 @@
 
 </main>
 
+<!-- SCRIPT MUST BE AT END (IMPORTANT FOR VERCEL) -->
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
   import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  /* Elements */
+  const audio = document.getElementById("morseAudio");
+  const playBtn = document.getElementById("playBtn");
+  const answerInput = document.getElementById("answerInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const timerText = document.getElementById("timer");
 
   let userUID = null;
 
@@ -190,7 +198,7 @@
   let sec=0;
   let interval=setInterval(()=>{
     sec++;
-    timer.innerText =
+    timerText.innerText =
       `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
   },1000);
 
@@ -199,7 +207,6 @@
   /* ---------------- AUDIO REPLAY LOCK ---------------- */
 
   let isLocked = false;
-  const audio = document.getElementById("morseAudio");
 
   audio.addEventListener("ended", () => {
     isLocked = false;
@@ -211,13 +218,11 @@
     if (isLocked) return alert("Replay after audio finishes!");
 
     isLocked = true;
-    audio.pause();
     audio.currentTime = 0;
+    audio.play();
 
-    audio.play().then(()=>{
-      playBtn.innerText = "▶ PLAYING...";
-      playBtn.style.opacity = "0.6";
-    });
+    playBtn.innerText = "▶ PLAYING...";
+    playBtn.style.opacity = "0.6";
   };
 
   /* ---------------- SUBMIT ---------------- */
@@ -241,12 +246,9 @@
 
     window.removeEventListener("beforeunload", blockUnload);
 
-  // ALWAYS GO NEXT ROUND
-  location.href = "round3.html";
-};
+    location.href = "round3.html";
+  };
 </script>
 
 </body>
 </html>
-
-
