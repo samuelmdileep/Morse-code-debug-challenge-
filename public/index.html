@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Morse Quest | HackHER Pre-Event</title>
+   <link rel="icon" type="image/png" href="hackher 1.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg1:#FDFCFA; --bg2:#FAEDCB; --bg3:#F2C6DE; --bg4:#DBCDF0; --bg5:#C6DEF1;
+      --purple:#8B6AAF; --pink:#D4789C; --green:#5A8A7A;
+      --text:#6A5A7A; --border:#DBCDF0;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Space Mono",monospace;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
+      color:var(--text); overflow-x:hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .hackher-header{
+      position:fixed; top:0; left:0; right:0; height:72px;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:0 32px; background:rgba(253,252,250,.9);
+      backdrop-filter:blur(12px); border-bottom:2px solid var(--border);
+      z-index:100;
+    }
+
+    .nav-left img{height:48px}
+    .nav-center{font-size:14px;color:#9B7BB8}
+    .nav-center a{text-decoration:none;color:var(--text);margin:0 6px}
+    .nav-right{display:flex;align-items:center;gap:14px}
+    .nav-right img{height:36px}
+
+    .register-btn{
+      display:flex;align-items:center;gap:6px;
+      padding:8px 14px;border-radius:10px;font-size:14px;
+      background:linear-gradient(135deg,#DBCDF0,#F2C6DE);
+      border:1px solid #C5B5E0;color:#6A4A7A;
+      text-decoration:none;transition:.2s;
+    }
+    .register-btn span{color:var(--green)}
+    .register-btn:hover{transform:scale(1.05)}
+
+    @media(max-width:900px){.nav-center{display:none}}
+
+    /* ===== MAIN ===== */
+    main{
+      max-width:1100px;margin:0 auto;
+      padding:120px 24px 80px;text-align:center;
+    }
+
+    .cmd{text-align:left;color:var(--green);margin-bottom:32px}
+
+    .logo-wrap {
+  overflow-x: hidden !important;
+}
+/* Hide scrollbar inside elements (Chrome/Safari/Edge) */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar in Firefox */
+* {
+  scrollbar-width: none;
+}
+    .hackher-ascii{
+  font-weight:700;
+  line-height:1.1;
+  text-align:center;
+  color:var(--purple);
+
+  white-space:pre-wrap;     /* same look, but wraps instead of scrolling */
+  overflow-x:hidden;        /* prevent scrollbar */
+  display:block;
+
+  font-size:clamp(.6rem,1.4vw,2rem);
+  margin:0 auto;            /* keep centered visually */
+  max-width:100%;           /* ensures no horizontal overflow */
+}
+
+
+    .subtitle{color:var(--pink);letter-spacing:2px;font-weight:700;margin-bottom:40px}
+
+    .terminal-box{
+      max-width:720px;margin:0 auto 40px;
+      padding:20px 24px;background:rgba(255,255,255,.6);
+      border:1px solid var(--border);border-radius:14px;text-align:left;
+    }
+    .terminal-box p::before{content:"> ";color:#6A9BC3;font-weight:bold}
+
+    .action a{
+      padding:14px 30px;border-radius:12px;border:2px solid #000;
+      text-decoration:none;color:#000;font-weight:700;transition:.2s;
+    }
+    .action a:hover{background:#000;color:#fff}
+  </style>
+</head>
+
+<body>
+
+<header class="hackher-header">
+  <div class="nav-left">
+    <img src="hackher 1.png" alt="HackHER Logo" loading="lazy">
+  </div>
+
+  <div class="nav-center">
+    [ <a href="#">"home"</a> , <a href="#about">"about"</a> ,
+      <a href="#tracks">"tracks"</a> , <a href="#timeline">"timeline"</a> ]
+  </div>
+
+  <div class="nav-right">
+    <img src="logo ieee.png" alt="IEEE MACE Logo" loading="lazy">
+    <a href="https://hackher.ieeemace.org/" target="_blank" class="register-btn">
+      <span>$</span> register →
+    </a>
+  </div>
+</header>
+
+<main>
+  <div class="cmd">$ npm run morse_quest --init</div>
+
+  <div class="logo-wrap">
+<pre class="hackher-ascii">
+██  ██  ▄▄▄   ▄▄▄▄ ▄▄ ▄▄ ██  ██ ▄▄▄▄▄ ▄▄▄▄  
+██████ ██▀██ ██▀▀▀ ██▄█▀ ██████ ██▄▄  ██▄█▄ 
+██  ██ ██▀██ ▀████ ██ ██ ██  ██ ██▄▄▄ ██ ██ 
+</pre>
+  </div>
+
+  <div class="subtitle">// Decode to Conquer</div>
+
+  <div class="terminal-box">
+    <p>
+      Morse Quest is the official pre-event challenge for HackHER.
+      Decode hidden signals, clear logic-driven rounds,
+      and earn your edge before the hackathon begins.
+    </p>
+  </div>
+
+  <div class="action">
+    <a href="login.html">&gt; begin_mission</a>
+  </div>
+</main>
+
+</body>
+</html>

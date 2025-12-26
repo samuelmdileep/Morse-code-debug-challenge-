@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Test</title>
+</head>
+
+<body>
+
+<h3>Audio Replay Test</h3>
+<p>Audio will only replay after it finishes.</p>
+
+<!-- Load your audio -->
+<audio id="morseAudio" src="power.mp3"></audio>
+
+<button id="playBtn">▶ PLAY AUDIO</button>
+
+<script>
+  const audio = document.getElementById("morseAudio");
+  const playBtn = document.getElementById("playBtn");
+
+  let isLocked = false;
+
+  // Unlock only when audio fully ends
+  audio.onended = () => {
+    isLocked = false;
+    playBtn.innerText = "▶ PLAY AGAIN";
+    playBtn.style.opacity = "1";
+  };
+
+  playBtn.onclick = () => {
+    if (isLocked) {
+      alert("You can replay after the audio finishes!");
+      return;
+    }
+
+    isLocked = true;
+
+    audio.pause();
+    audio.currentTime = 0;
+
+    audio.play().then(() => {
+      playBtn.innerText = "▶ PLAYING...";
+      playBtn.style.opacity = "0.6";
+    });
+  };
+</script>
+
+</body>
+</html>
