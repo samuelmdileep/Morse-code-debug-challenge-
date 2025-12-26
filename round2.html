@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Round 2 | Audio Morse</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
 
@@ -147,8 +148,14 @@
 
   let userUID = null;
 
-  /* ---------------- ANTI REFRESH / BACK / CLOSE ---------------- */
+  /* ---------------- DOM ELEMENTS (FIXED) ---------------- */
+  const audio = document.getElementById("morseAudio");
+  const playBtn = document.getElementById("playBtn");
+  const answerInput = document.getElementById("answerInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const timer = document.getElementById("timer");
 
+  /* ---------------- ANTI REFRESH / BACK / CLOSE ---------------- */
   function blockUnload(e){
     e.preventDefault();
     e.returnValue = "";
@@ -165,7 +172,6 @@
   window.onpopstate = ()=>{ history.go(1); alert("Back navigation is disabled!"); };
 
   /* ---------------- PREVENT RESTART ---------------- */
-
   onAuthStateChanged(auth, async(user)=>{
     if(!user){ location.href="login.html"; return; }
 
@@ -197,7 +203,6 @@
   /* ---------------- AUDIO REPLAY LOCK ---------------- */
 
   let isLocked = false;
-  const audio = document.getElementById("morseAudio");
 
   audio.addEventListener("ended", () => {
     isLocked = false;
@@ -206,7 +211,10 @@
   });
 
   playBtn.onclick = () => {
-    if (isLocked) return alert("Replay after audio finishes!");
+    if (isLocked) {
+      alert("Replay after the audio finishes!");
+      return;
+    }
 
     isLocked = true;
     audio.pause();
@@ -239,12 +247,10 @@
 
     window.removeEventListener("beforeunload", blockUnload);
 
-   // ALWAYS GO NEXT ROUND
-  location.href = "round3.html";
+    location.href = "round3.html";
   };
 
 </script>
 
 </body>
 </html>
-
