@@ -84,22 +84,22 @@
     }
 
     /* FINAL OVERFLOW-PROOF ASCII */
-    .hackher-ascii {
-      font-weight:700;
-      line-height:1.1;
-      text-align:center;
-      color:var(--purple);
+   .hackher-ascii {
+  font-weight:700;
+  line-height:1.1;
+  text-align:center;
+  color:var(--purple);
 
-      white-space:pre-wrap;        /* wrap ASCII */
-      word-break:break-word;       /* break long blocks */
-      overflow-wrap:break-word;    /* enhanced wrap */
-      overflow-x:hidden !important;
+  white-space:pre; 
+  overflow-x:auto;
+  display:block;
 
-      display:block;
-      font-size:clamp(.6rem,1.4vw,2rem);
-      margin:0 auto;
-      max-width:100%;
-    }
+  font-size:clamp(.7rem, 4vw, 2.2rem);
+
+  margin:0 auto;
+  max-width:100%;
+}
+
 
     .subtitle{
       color:var(--pink);letter-spacing:2px;font-weight:700;margin-bottom:40px;
@@ -170,5 +170,6 @@
 
 </body>
 </html>
+
 
 
