@@ -2,93 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Leaderboard | Admin</title>  
+  <title>Leaderboard | Morse Quest</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
-
 
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --purple:#8B6AAF;
-      --pink:#D4789C;
       --text:#6A5A7A;
       --border:#DBCDF0;
-      --bg:rgba(255,255,255,0.65);
+      --bg:rgba(255,255,255,0.8);
     }
 
     body{
       margin:0;
       font-family:"Space Mono",monospace;
-      background: linear-gradient(180deg,#FDFCFA,#FAEDCB,#F2C6DE,#DBCDF0,#C6DEF1);
+      background:linear-gradient(180deg,#FDFCFA,#FAEDCB,#F2C6DE,#DBCDF0,#C6DEF1);
       color:var(--text);
       overflow-x:hidden;
     }
 
-    /* HEADER */
     .hackher-header{
-      position:fixed;top:0;left:0;right:0;height:72px;
-      padding:0 32px;display:flex;align-items:center;
-      justify-content:space-between;
-      background:rgba(253,252,250,.9);
-      backdrop-filter:blur(12px);
+      position:fixed; top:0; left:0; right:0; height:72px;
+      padding:0 32px; display:flex; align-items:center;
+      background:rgba(253,252,250,.9); backdrop-filter:blur(10px);
       border-bottom:2px solid var(--border);
       z-index:100;
     }
-    .nav-left img{height:48px}
+    .hackher-header img{ height:48px; }
 
     main{
-      max-width:900px;margin:0 auto;padding:120px 20px;
+      max-width:900px;
+      margin:0 auto;
+      padding:120px 20px;
     }
 
     h2{
       text-align:center;
       color:var(--purple);
-      font-size:32px;
-      margin-bottom:30px;
+      font-size:34px;
       font-weight:700;
+      margin-bottom:30px;
     }
 
+    /* TABLE CONTAINER */
     .table-box{
       background:var(--bg);
       border:1px solid var(--border);
-      border-radius:14px;
-      padding:20px;
-      box-shadow:0 10px 20px rgba(0,0,0,0.05);
+      border-radius:18px;
+      padding:25px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.1);
     }
 
     table{
       width:100%;
       border-collapse:collapse;
-      font-size:16px;
+      table-layout:fixed;
     }
 
-    th,td{
-      padding:12px;
-      border-bottom:1px solid #c9bfe8;
-      text-align:left;
+    th, td{
+      padding:14px 10px;
+      border-bottom:1px solid #e7dffc;
+      text-align:center;
+      font-size:17px;
     }
 
     th{
       color:var(--purple);
       font-weight:700;
+      font-size:18px;
     }
 
-    .add-btn{
-      padding:6px 14px;
-      border-radius:8px;
-      border:2px solid var(--purple);
-      background:#fff;
+    .name-btn{
       cursor:pointer;
       color:var(--purple);
       font-weight:700;
-      transition:.2s;
+      text-decoration:underline;
     }
 
-    .add-btn:hover{
-      background:var(--purple);
-      color:#fff;
+    /* PDF Button */
+    .download-wrapper{
+      display:flex;
+      justify-content:center;
+      margin-top:28px;
     }
+
+    #downloadPDF{
+      padding:12px 22px;
+      font-size:16px;
+      border:2px solid var(--purple);
+      background:#fff;
+      color:var(--purple);
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      transition:0.2s;
+    }
+
+    #downloadPDF:hover{
+      background:var(--purple); color:#fff;
+    }
+
+    /* ---------------- POPUP ---------------- */
+    #popup{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:999;
+    }
+
+    #popupBox{
+      width:380px;
+      background:white;
+      padding:28px;
+      border-radius:18px;
+      text-align:center;
+      box-shadow:0 10px 35px rgba(0,0,0,0.25);
+      animation:pop 0.25s ease;
+    }
+
+    @keyframes pop {
+      from { transform:scale(0.85); opacity:0; }
+      to { transform:scale(1); opacity:1; }
+    }
+
+    #popupBox h3{
+      color:var(--purple);
+      margin-bottom:12px;
+      font-size:22px;
+    }
+
+    #popupBox p{
+      line-height:1.5;
+      font-size:16px;
+      color:#555;
+    }
+
+    .closeBtn{
+      margin-top:18px;
+      padding:10px 20px;
+      border-radius:10px;
+      border:2px solid var(--purple);
+      background:white;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--purple);
+      transition:0.2s;
+    }
+
+    .closeBtn:hover{
+      background:var(--purple);
+      color:white;
+    }
+
   </style>
 </head>
 
@@ -96,94 +166,249 @@
 
   <!-- HEADER -->
   <header class="hackher-header">
-    <div class="nav-left">
-      <img src="../hackher 1.png" alt="HackHER">
-    </div>
+    <img src="../hackher 1.png">
   </header>
 
-  <!-- MAIN -->
   <main>
-    <h2>$ Leaderboard (Admin Only)</h2>
+
+    <h2>$ Morse Quest — Leaderboard</h2>
 
     <div class="table-box">
+
       <table id="leaderboardTable">
         <thead>
           <tr>
             <th>Rank</th>
             <th>Name</th>
-            <th>Points</th>
-            <th>+</th>
+            <th>Score</th>
+            <th>Total Time</th>
           </tr>
         </thead>
+
         <tbody id="leaderboardBody">
-          <!-- Data loads from Firestore -->
+          <!-- Filled by JS -->
         </tbody>
       </table>
+
+      <div class="download-wrapper">
+        <button id="downloadPDF">📄 Download Leaderboard as PDF</button>
+      </div>
+
     </div>
+
   </main>
 
-  <!-- FIREBASE -->
+  <!-- POPUP -->
+  <div id="popup">
+    <div id="popupBox">
+      <h3 id="pName"></h3>
+      <p id="pDetails"></p>
+      <button class="closeBtn" onclick="popup.style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <!-- PDF LIBRARIES -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- FIREBASE LOGIC -->
   <script type="module">
-    import { auth, db } from "../firebase.js";
-    import { onAuthStateChanged } from 
-      "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { db } from "../firebase.js";
+    import { collection, getDocs, doc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    import { collection, getDocs, updateDoc, doc, orderBy, query } from 
-      "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    const tbody = document.getElementById("leaderboardBody");
+    const popup = document.getElementById("popup");
 
-    // PROTECT ADMIN PAGE
-    onAuthStateChanged(auth, user => {
-      if(!user){
-        window.location.href = "../login.html";
-      }
-    });
+    let FINAL_LIST = [];
 
-    // LOAD LEADERBOARD
     async function loadLeaderboard(){
-      const ref = collection(db, "scores");
-      const q = query(ref, orderBy("points", "desc"));
-      const snapshot = await getDocs(q);
+      const scoreDocs = await getDocs(collection(db, "scores"));
 
-      const tbody = document.getElementById("leaderboardBody");
-      tbody.innerHTML = "";
-      
+      let list = [];
+
+      for (const snap of scoreDocs.docs){
+        const scoreData = snap.data();
+        const userRef = doc(db, "users", snap.id);
+        const userSnap = await getDoc(userRef);
+
+        const user = userSnap.exists() ? userSnap.data() : {};
+
+        const totalScore =
+          (scoreData.level1?.score || 0) +
+          (scoreData.level2?.score || 0) +
+          (scoreData.level3?.score || 0) +
+          (scoreData.level4?.score || 0);
+
+        const totalTime =
+          (scoreData.level1?.timeTaken || 999) +
+          (scoreData.level2?.timeTaken || 999) +
+          (scoreData.level3?.timeTaken || 999) +
+          (scoreData.level4?.timeTaken || 999);
+
+        list.push({
+          id: snap.id,
+          name: user.name || "Unknown",
+          email: user.email || "No email",
+          phone: user.phone || "No phone",
+          score: totalScore,
+          time: totalTime,
+          fullScore: scoreData
+        });
+      }
+
+      // Sort by score → time
+      list.sort((a,b)=>{
+        if(a.score !== b.score) return b.score - a.score;
+        return a.time - b.time;
+      });
+
+      FINAL_LIST = list;  // store globally for pdf & popup
+
       let rank = 1;
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
+      tbody.innerHTML = "";
+
+      list.forEach(p=>{
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td>${rank++}</td>
-          <td>${data.name}</td>
-          <td>${data.points}</td>
-          <td><button class="add-btn" data-id="${docSnap.id}">+10</button></td>
+          <td>${rank}</td>
+          <td><span class="name-btn" data-id="${p.id}">${p.name}</span></td>
+          <td>${p.score}</td>
+          <td>${p.time}s</td>
         `;
 
         tbody.appendChild(tr);
+        rank++;
       });
 
-      attachAddPointHandlers();
-    }
-
-    // ADD POINTS
-    function attachAddPointHandlers(){
-      document.querySelectorAll(".add-btn").forEach(btn => {
-        btn.onclick = async () => {
-          const id = btn.getAttribute("data-id");
-          const ref = doc(db, "scores", id);
-
-          // Fetch current score
-          const snap = await getDocs(collection(db, "scores"));
-          let current = 0;
-          snap.forEach(s => {
-            if(s.id === id) current = s.data().points;
-          });
-
-          await updateDoc(ref, { points: current + 10 });
-          loadLeaderboard();
-        }
+      document.querySelectorAll(".name-btn").forEach(btn=>{
+        btn.onclick = ()=> showPopup(btn.dataset.id);
       });
     }
+
+    function showPopup(uid){
+      const user = FINAL_LIST.find(x => x.id === uid);
+
+      document.getElementById("pName").innerText = user.name;
+
+      document.getElementById("pDetails").innerHTML = `
+        <b>Email:</b> ${user.email}<br>
+        <b>Phone:</b> ${user.phone}<br><br>
+
+        <b>Total Score:</b> ${user.score} / 4<br>
+        <b>Total Time:</b> ${user.time}s<br><br>
+
+        <b>Round Breakdown:</b><br>
+        1️⃣ ${user.fullScore.level1?.score || 0} pts (${user.fullScore.level1?.timeTaken || 0}s)<br>
+        2️⃣ ${user.fullScore.level2?.score || 0} pts (${user.fullScore.level2?.timeTaken || 0}s)<br>
+        3️⃣ ${user.fullScore.level3?.score || 0} pts (${user.fullScore.level3?.timeTaken || 0}s)<br>
+        4️⃣ ${user.fullScore.level4?.score || 0} pts (${user.fullScore.level4?.timeTaken || 0}s)
+      `;
+
+      popup.style.display = "flex";
+    }
+
+    /* ---------------- PDF DOWNLOAD ---------------- */
+document.getElementById("downloadPDF").onclick = () => downloadPDF();
+
+async function downloadPDF() {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "pt",
+    format: "A4"
+  });
+
+  /* =============================
+     HEADER
+     ============================= */
+  doc.setFillColor(139, 106, 175);
+  doc.rect(0, 0, doc.internal.pageSize.width, 70, "F");
+
+  doc.setFont("courier", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  doc.text("HackHER - Morse Quest Leaderboard", 40, 42);
+
+  /* =============================
+     WINNERS BOX (with border + shadow)
+     ============================= */
+  const cardX = 40;
+  const cardY = 90;
+  const cardWidth = doc.internal.pageSize.width - 80;
+  const cardHeight = 120;
+
+  // Shadow
+  doc.setFillColor(230, 230, 240);
+  doc.roundedRect(cardX + 3, cardY + 3, cardWidth, cardHeight, 12, 12, "F");
+
+  // Main box
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(200, 190, 230);
+  doc.setLineWidth(1.2);
+  doc.roundedRect(cardX, cardY, cardWidth, cardHeight, 12, 12, "FD");
+
+  // Title
+  doc.setFont("courier", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(60, 60, 60);
+  doc.text("Top 3 Winners", cardX + 20, cardY + 30);
+
+  // Data
+  doc.setFont("courier", "normal");
+  doc.setFontSize(12);
+  doc.setTextColor(80, 80, 80);
+
+  for (let i = 0; i < Math.min(3, FINAL_LIST.length); i++) {
+    const p = FINAL_LIST[i];
+    const y = cardY + 60 + (i * 20);
+
+    doc.text(`${i + 1}. ${p.name}`, cardX + 20, y);
+    doc.text(`${p.email}`, cardX + 200, y);
+    doc.text(`${p.phone}`, cardX + 400, y);
+  }
+
+  /* =============================
+     TABLE
+     ============================= */
+  const tableData = FINAL_LIST.map((p, i) => [
+    i + 1,
+    p.name,
+    p.score,
+    `${p.time}s`
+  ]);
+
+  doc.autoTable({
+    head: [["Rank", "Name", "Score", "Time"]],
+    body: tableData,
+    startY: cardY + cardHeight + 40,
+    theme: "grid",
+    styles: {
+      font: "courier",
+      fontSize: 12,
+      cellPadding: 8,
+      lineColor: [210, 200, 230],
+      lineWidth: 0.7
+    },
+    headStyles: {
+      fillColor: [139, 106, 175],
+      textColor: [255, 255, 255],
+      halign: "center",
+      fontStyle: "bold"
+    },
+    alternateRowStyles: { fillColor: [245, 240, 255] }
+  });
+
+  /* FOOTER */
+  const date = new Date().toLocaleString();
+  doc.setFontSize(10);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`Generated on: ${date}`, 40, doc.internal.pageSize.height - 30);
+
+  doc.save("MorseQuest_Leaderboard.pdf");
+}
 
     loadLeaderboard();
   </script>
