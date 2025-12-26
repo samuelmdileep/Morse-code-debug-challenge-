@@ -239,14 +239,12 @@
 
     window.removeEventListener("beforeunload", blockUnload);
 
-    if(typed === correct){
-      location.href = "round3.html";
-    } else {
-      alert("Incorrect answer!");
-    }
+   // ALWAYS GO NEXT ROUND
+  location.href = "round3.html";
   };
 
 </script>
 
 </body>
 </html>
+
