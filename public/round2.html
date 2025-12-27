@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <title>Round 2 | Audio Morse</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
@@ -45,18 +45,19 @@
     }
 
     .round-box{
-      padding:30px;
+      padding:32px;
       background:rgba(255,255,255,0.65);
       border:1px solid var(--border);
-      border-radius:14px;
-      box-shadow:0 10px 25px rgba(0,0,0,0.05);
+      border-radius:16px;
+      box-shadow:0 10px 28px rgba(0,0,0,0.06);
     }
 
     h2{
       text-align:center;
       color:var(--purple);
-      font-size:30px;
-      margin-bottom:12px;
+      font-size:32px;
+      margin-bottom:14px;
+      font-weight:700;
     }
 
     .timer-bar{
@@ -64,20 +65,21 @@
       font-size:20px;
       font-weight:700;
       color:var(--purple);
-      margin-bottom:20px;
+      margin-bottom:28px;
     }
 
     .play-btn{
       width:100%;
-      padding:14px;
-      margin-top:10px;
-      border:2px solid var(--purple);
+      padding:16px;
+      margin-top:12px;
+      border:2.5px solid var(--purple);
       background:#fff;
       color:var(--purple);
       font-weight:700;
-      border-radius:10px;
+      border-radius:12px;
       cursor:pointer;
       transition:.2s;
+      font-size:18px;
     }
     .play-btn:hover{
       background:var(--purple); color:#fff;
@@ -85,26 +87,36 @@
 
     .answer-input{
       width:100%;
-      padding:14px;
-      margin-top:20px;
-      border-radius:10px;
-      border:2px solid var(--border);
+      padding:16px 18px;
+      margin-top:26px;
+      border-radius:12px;
+      border:2.5px solid var(--purple);
+      background:#fff;
       font-family:"Space Mono",monospace;
-      font-size:18px;
+      font-size:20px;
+      font-weight:600;
+      color:var(--text);
       outline:none;
       text-transform:uppercase;
+      box-shadow:0 3px 10px rgba(0,0,0,0.05);
+      transition:0.2s;
+    }
+    .answer-input:focus{
+      border-color:var(--pink);
+      box-shadow:0 0 0 3px rgba(212,120,156,0.25);
     }
 
     .submit-btn{
       width:100%;
-      padding:14px;
-      margin-top:22px;
-      border:2px solid #000;
+      padding:16px;
+      margin-top:26px;
+      border:2.5px solid #000;
       background:#fff;
-      border-radius:10px;
+      border-radius:12px;
       cursor:pointer;
-      font-size:18px;
+      font-size:20px;
       font-weight:700;
+      transition:.2s;
     }
     .submit-btn:hover{
       background:#000; color:#fff;
@@ -127,7 +139,9 @@
   <div class="round-box">
     <h2>$ Round 2 – Audio Morse</h2>
 
-    <p>Listen to the Morse code and type the decoded word below.</p>
+    <p style="font-size:17px; line-height:1.5; text-align:center;">
+      Listen to the Morse code and type the decoded word below.
+    </p>
 
     <!-- AUDIO -->
     <audio id="morseAudio" src="audio/power.mp3"></audio>
@@ -149,25 +163,18 @@
 
   let userUID = null;
 
-  /* ---------------- ANTI REFRESH / BACK / CLOSE ---------------- */
-
-  function blockUnload(e){
-    e.preventDefault();
-    e.returnValue = "";
-  }
+  /* ---- Anti refresh / back ---- */
+  function blockUnload(e){ e.preventDefault(); e.returnValue=""; }
   window.addEventListener("beforeunload", blockUnload);
 
   document.addEventListener("keydown",(e)=>{
-    if(e.key==="F5" || (e.ctrlKey&&e.key==="r")){
-      e.preventDefault(); alert("Refreshing is not allowed!");
-    }
+    if(e.key==="F5" || (e.ctrlKey&&e.key==="r")){ e.preventDefault(); alert("Refreshing is not allowed!"); }
   });
 
   history.pushState(null,null,location.href);
   window.onpopstate = ()=>{ history.go(1); alert("Back navigation is disabled!"); };
 
-  /* ---------------- PREVENT RESTART ---------------- */
-
+  /* ---- Prevent restart ---- */
   onAuthStateChanged(auth, async(user)=>{
     if(!user){ location.href="login.html"; return; }
 
@@ -175,29 +182,24 @@
 
     const snap = await getDoc(doc(db,"scores",userUID));
     if (snap.exists() && snap.data().level2?.started){
-      alert("Round 2 already started!");
       window.removeEventListener("beforeunload", blockUnload);
       location.href="round3.html";
       return;
     }
 
-    await setDoc(doc(db,"scores",userUID),{
-      level2:{ started: Date.now() }
-    },{ merge:true });
+    await setDoc(doc(db,"scores",userUID),{ level2:{ started: Date.now() } },{ merge:true });
   });
 
-  /* ---------------- TIMER ---------------- */
+  /* ---- Timer ---- */
   let sec=0;
   let interval=setInterval(()=>{
     sec++;
-    timer.innerText =
-      `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+    timer.innerText = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
   },1000);
 
   function stopTimer(){ clearInterval(interval); return sec; }
 
-  /* ---------------- AUDIO REPLAY LOCK ---------------- */
-
+  /* ---- Audio ---- */
   let isLocked = false;
   const audio = document.getElementById("morseAudio");
 
@@ -220,44 +222,40 @@
     });
   };
 
-  /* ---------------- SUBMIT ---------------- */
-
+  /* ---- Submit ---- */
   submitBtn.onclick = async()=>{
     const typed = answerInput.value.trim().toUpperCase();
     if (!typed){ alert("Enter your decoded answer!"); return; }
 
-    const correct = "POWER";  // FINAL ANSWER
+    const correct = "POWER";
     const totalTime = stopTimer();
 
     await setDoc(doc(db,"scores",userUID),{
       level2:{
-        typed: typed,
-        correct: (typed === correct),
-        score: (typed === correct ? 1 : 0),
-        timeTaken: totalTime,
-        submittedAt: Date.now()
+        typed, correct:(typed===correct),
+        score:(typed===correct?1:0),
+        timeTaken:totalTime,
+        submittedAt:Date.now()
       }
     },{ merge:true });
 
     window.removeEventListener("beforeunload", blockUnload);
-
-  // ALWAYS GO NEXT ROUND
-  location.href = "round3.html";
-};
+    location.href = "round3.html";
+  };
 </script>
+
+<!-- Mobile unlock -->
 <script>
-  // unlock audio on first user tap (MOBILE FIX)
-  document.addEventListener("touchstart", () => {
-    const a = document.getElementById("morseAudio");
-    if (a) {
-      a.muted = false;
-      a.play().catch(()=>{});
-      a.pause();
-      a.currentTime = 0;
-    }
-  }, { once:true });
+document.addEventListener("touchstart", () => {
+  const a = document.getElementById("morseAudio");
+  if (a) {
+    a.muted = false;
+    a.play().catch(()=>{});
+    a.pause();
+    a.currentTime = 0;
+  }
+}, { once:true });
 </script>
-
 
 </body>
 </html>
