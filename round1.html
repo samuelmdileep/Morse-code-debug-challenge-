@@ -150,6 +150,7 @@
   let userUID = null;
   let selectedOption = null;
 
+  // Prevent refresh/back
   function blockUnload(e){
     e.preventDefault();
     e.returnValue = "";
@@ -166,7 +167,7 @@
   history.pushState(null,null,location.href);
   window.onpopstate = ()=>{ history.go(1); alert("Back navigation is disabled!"); };
 
-  // ---- AUTH LOCK ----
+  // Auth check
   onAuthStateChanged(auth, async(user)=>{
     if(!user){ location.href="login.html"; return; }
     userUID = user.uid;
@@ -185,7 +186,7 @@
     },{ merge:true });
   });
 
-  // ---- TIMER ----
+  // TIMER
   let sec=0;
   let tm=setInterval(()=>{
     sec++;
@@ -193,7 +194,7 @@
   },1000);
   function stopTimer(){ clearInterval(tm); return sec; }
 
-  // ---- OPTIONS ----
+  // OPTIONS
   document.querySelectorAll(".option").forEach(o=>{
     o.addEventListener("click",()=>{
       document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
@@ -202,20 +203,20 @@
     });
   });
 
-  // ---- SUBMIT ----
+  // SUBMIT (no correctness logic)
   submitBtn.onclick = async()=>{
-    if(!selectedOption){ alert("Select an option!"); return; }
+    if(!selectedOption){
+      alert("Select an option!");
+      return;
+    }
 
-    const correct = "D";
     const totalTime = stopTimer();
 
     await setDoc(doc(db,"scores",userUID),{
       level1:{
-        selected:selectedOption,
-        correct:(selectedOption===correct),
-        score:(selectedOption===correct?1:0),
-        timeTaken:totalTime,
-        submittedAt:Date.now()
+        response: selectedOption,   
+        timeTaken: totalTime,
+        submittedAt: Date.now()
       }
     },{ merge:true });
 
