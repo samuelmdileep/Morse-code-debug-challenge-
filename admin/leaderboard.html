@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaderboard | Morse Quest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link rel="icon" type="image/png" href="../hackher 1.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --purple:#8B6AAF;
+      --text:#6A5A7A;
+      --border:#DBCDF0;
+      --bg:rgba(255,255,255,0.8);
+    }
+
+    body{
+      margin:0;
+      font-family:"Space Mono",monospace;
+      background:linear-gradient(180deg,#FDFCFA,#FAEDCB,#F2C6DE,#DBCDF0,#C6DEF1);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    .hackher-header{
+      position:fixed; top:0; left:0; right:0; height:72px;
+      padding:0 32px; display:flex; align-items:center;
+      background:rgba(253,252,250,.9); backdrop-filter:blur(10px);
+      border-bottom:2px solid var(--border);
+      z-index:100;
+    }
+    .hackher-header img{ height:48px; }
+
+    main{
+      max-width:900px;
+      margin:0 auto;
+      padding:120px 20px;
+    }
+
+    h2{
+      text-align:center;
+      color:var(--purple);
+      font-size:34px;
+      font-weight:700;
+      margin-bottom:30px;
+    }
+
+    .table-box{
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:25px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+    }
+
+    th, td{
+      padding:14px 10px;
+      border-bottom:1px solid #e7dffc;
+      text-align:center;
+      font-size:17px;
+    }
+
+    th{
+      color:var(--purple);
+      font-weight:700;
+      font-size:18px;
+    }
+
+    .name-btn{
+      cursor:pointer;
+      color:var(--purple);
+      font-weight:700;
+      text-decoration:underline;
+    }
+
+    .download-wrapper{
+      display:flex;
+      justify-content:center;
+      margin-top:28px;
+    }
+
+    #downloadPDF{
+      padding:12px 22px;
+      font-size:16px;
+      border:2px solid var(--purple);
+      background:#fff;
+      color:var(--purple);
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      transition:0.2s;
+    }
+
+    #downloadPDF:hover{
+      background:var(--purple); color:#fff;
+    }
+
+    /* POPUP */
+    #popup{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:999;
+    }
+
+    #popupBox{
+      width:380px;
+      background:white;
+      padding:28px;
+      border-radius:18px;
+      text-align:center;
+      box-shadow:0 10px 35px rgba(0,0,0,0.25);
+      animation:pop 0.25s ease;
+    }
+
+    @keyframes pop {
+      from { transform:scale(0.85); opacity:0; }
+      to { transform:scale(1); opacity:1; }
+    }
+
+    #popupBox h3{
+      color:var(--purple);
+      margin-bottom:12px;
+      font-size:22px;
+    }
+
+    #popupBox p{
+      line-height:1.5;
+      font-size:16px;
+      color:#555;
+    }
+
+    .closeBtn{
+      margin-top:18px;
+      padding:10px 20px;
+      border-radius:10px;
+      border:2px solid var(--purple);
+      background:white;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--purple);
+      transition:0.2s;
+    }
+
+    .closeBtn:hover{
+      background:var(--purple);
+      color:white;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header class="hackher-header">
+    <img src="../hackher 1.png">
+  </header>
+
+  <main>
+
+    <h2>$ Morse Quest — Leaderboard</h2>
+
+    <div class="table-box">
+
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Total Time</th>
+          </tr>
+        </thead>
+
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+
+      <div class="download-wrapper">
+        <button id="downloadPDF">📄 Download Leaderboard as PDF</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- POPUP -->
+  <div id="popup">
+    <div id="popupBox">
+      <h3 id="pName"></h3>
+      <p id="pDetails"></p>
+      <button class="closeBtn" onclick="popup.style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <!-- PDF LIBRARIES -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- FIREBASE LOGIC -->
+  <script type="module">
+    import { db } from "../firebase.js";
+    import { collection, getDocs, doc, getDoc }
+      from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const tbody = document.getElementById("leaderboardBody");
+    const popup = document.getElementById("popup");
+
+    const CORRECT = {
+      level1: "D",
+      level2: "POWER",
+      level3: "SHE",
+      level4: "DATA"
+    };
+
+    function check(round, val){
+      if(!val) return "Not Attempted ❌";
+      return val.toUpperCase().trim() === CORRECT[round]
+        ? "Correct ✅"
+        : "Wrong ❌";
+    }
+
+    let FINAL_LIST = [];
+
+    async function loadLeaderboard(){
+      const scoreDocs = await getDocs(collection(db, "scores"));
+      let list = [];
+
+      for(const snap of scoreDocs.docs){
+        const s = snap.data();
+
+        const userRef = doc(db,"users",snap.id);
+        const userSnap = await getDoc(userRef);
+        const u = userSnap.exists() ? userSnap.data() : {};
+
+        const totalScore = s.finalScore || 0;
+
+
+        const totalTime =
+          (s.level1?.timeTaken || 999) +
+          (s.level2?.timeTaken || 999) +
+          (s.level3?.timeTaken || 999) +
+          (s.level4?.timeTaken || 999);
+
+        list.push({
+          id: snap.id,
+          name: u.name || "Unknown",
+          email: u.email || "",
+          phone: u.phone || "",
+          score: totalScore,
+          time: totalTime,
+          full: s
+        });
+      }
+
+      list.sort((a,b)=>{
+        if(a.score !== b.score) return b.score - a.score;
+        return a.time - b.time;
+      });
+
+      FINAL_LIST = list;
+      tbody.innerHTML = "";
+
+      let rank = 1;
+      list.forEach(u=>{
+        tbody.innerHTML += `
+          <tr>
+            <td>${rank}</td>
+            <td><span class="name-btn" data-id="${u.id}">${u.name}</span></td>
+            <td>${u.score}</td>
+            <td>${u.time}s</td>
+          </tr>
+        `;
+        rank++;
+      });
+
+      document.querySelectorAll(".name-btn").forEach(b=>{
+        b.onclick = ()=> showPopup(b.dataset.id);
+      });
+    }
+
+    function showPopup(uid){
+      const x = FINAL_LIST.find(a=>a.id === uid);
+      const s = x.full;
+
+      document.getElementById("pName").innerText = x.name;
+
+      document.getElementById("pDetails").innerHTML = `
+        <b>Email:</b> ${x.email}<br>
+        <b>Phone:</b> ${x.phone}<br><br>
+
+        <b>Total Score:</b> ${x.score} / 4<br>
+        <b>Total Time:</b> ${x.time}s<br><br>
+
+        <b>Round Breakdown:</b><br><br>
+
+        1️⃣ Round 1 — ${check("level1", s.level1?.response)}<br>
+        <small>Ans: ${s.level1?.response || "-"}</small><br>
+        <small>Time: ${s.level1?.timeTaken || 0}s</small><br><br>
+
+        2️⃣ Round 2 — ${check("level2", s.level2?.response)}<br>
+        <small>Ans: ${s.level2?.response || "-"}</small><br>
+        <small>Time: ${s.level2?.timeTaken || 0}s</small><br><br>
+
+        3️⃣ Round 3 — ${check("level3", s.level3?.response)}<br>
+        <small>Ans: ${s.level3?.response || "-"}</small><br>
+        <small>Time: ${s.level3?.timeTaken || 0}s</small><br><br>
+
+        4️⃣ Round 4 — ${check("level4", s.level4?.response)}<br>
+        <small>Ans: ${s.level4?.response || "-"}</small><br>
+        <small>Time: ${s.level4?.timeTaken || 0}s</small>
+      `;
+
+      popup.style.display = "flex";
+    }
+
+/* ---------------- BEAUTIFUL PDF EXPORT (FULL LIST ONLY) ---------------- */
+document.getElementById("downloadPDF").onclick = () => generatePDF();
+
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "pt",
+    format: "A4"
+  });
+
+  const pageWidth = pdf.internal.pageSize.width;
+
+  /* ===== HEADER ===== */
+  pdf.setFillColor(139, 106, 175); // HackHER purple
+  pdf.rect(0, 0, pageWidth, 70, "F");
+
+  pdf.setFont("courier", "bold");
+  pdf.setFontSize(22);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text("HackHER — Morse Quest Leaderboard", 40, 42);
+
+  /* ===== FULL LEADERBOARD TABLE ===== */
+  const tableBody = FINAL_LIST.map((p, i) => [
+    i + 1,
+    p.name,
+    p.email,
+    p.phone,
+    p.score,
+    `${p.time}s`
+  ]);
+
+  pdf.autoTable({
+    head: [["Rank", "Name", "Email", "Phone", "Score", "Time"]],
+    body: tableBody,
+    startY: 100,   // starts directly after header
+    theme: "grid",
+    headStyles: {
+      fillColor: [139, 106, 175],
+      textColor: [255, 255, 255],
+      fontSize: 12,
+      fontStyle: "bold"
+    },
+    styles: {
+      font: "courier",
+      cellPadding: 6,
+      fontSize: 10,
+      lineColor: [200, 190, 230],
+      lineWidth: 0.6,
+    },
+    alternateRowStyles: { fillColor: [245, 240, 255] }
+  });
+
+  /* ===== FOOTER ===== */
+  pdf.setFontSize(10);
+  pdf.setTextColor(130, 130, 130);
+  pdf.text(
+    `Generated on ${new Date().toLocaleString()}`,
+    40,
+    pdf.internal.pageSize.height - 20
+  );
+
+  pdf.save("MorseQuest_Leaderboard.pdf");
+}
+
+loadLeaderboard();
+
+  </script>
+
+</body>
+</html>
