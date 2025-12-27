@@ -104,7 +104,6 @@
       background:var(--purple); color:#fff;
     }
 
-    /* POPUP */
     #popup{
       position:fixed;
       inset:0;
@@ -224,6 +223,12 @@
       level4: "DATA"
     };
 
+    // Universal function to extract answers
+    function getAns(level){
+      return level?.response || level?.selected || level?.typed || "";
+    }
+
+    // Check correct/wrong for popup
     function check(round, val){
       if(!val) return "Not Attempted ❌";
       return val.toUpperCase().trim() === CORRECT[round]
@@ -234,18 +239,29 @@
     let FINAL_LIST = [];
 
     async function loadLeaderboard(){
+
       const scoreDocs = await getDocs(collection(db, "scores"));
       let list = [];
 
       for(const snap of scoreDocs.docs){
         const s = snap.data();
 
+        // USER INFO
         const userRef = doc(db,"users",snap.id);
         const userSnap = await getDoc(userRef);
         const u = userSnap.exists() ? userSnap.data() : {};
 
-        const totalScore = s.finalScore || 0;
+        // ----------- FIXED SCORE CALCULATION -----------
+        const a1 = getAns(s.level1);
+        const a2 = getAns(s.level2);
+        const a3 = getAns(s.level3);
+        const a4 = getAns(s.level4);
 
+        let finalScore = 0;
+        if(a1.toUpperCase().trim() === CORRECT.level1) finalScore++;
+        if(a2.toUpperCase().trim() === CORRECT.level2) finalScore++;
+        if(a3.toUpperCase().trim() === CORRECT.level3) finalScore++;
+        if(a4.toUpperCase().trim() === CORRECT.level4) finalScore++;
 
         const totalTime =
           (s.level1?.timeTaken || 999) +
@@ -258,12 +274,13 @@
           name: u.name || "Unknown",
           email: u.email || "",
           phone: u.phone || "",
-          score: totalScore,
+          score: finalScore,
           time: totalTime,
           full: s
         });
       }
 
+      // Sort by score desc, time asc
       list.sort((a,b)=>{
         if(a.score !== b.score) return b.score - a.score;
         return a.time - b.time;
@@ -294,6 +311,11 @@
       const x = FINAL_LIST.find(a=>a.id === uid);
       const s = x.full;
 
+      const a1 = getAns(s.level1);
+      const a2 = getAns(s.level2);
+      const a3 = getAns(s.level3);
+      const a4 = getAns(s.level4);
+
       document.getElementById("pName").innerText = x.name;
 
       document.getElementById("pDetails").innerHTML = `
@@ -305,93 +327,85 @@
 
         <b>Round Breakdown:</b><br><br>
 
-        1️⃣ Round 1 — ${check("level1", s.level1?.response)}<br>
-        <small>Ans: ${s.level1?.response || "-"}</small><br>
+        1️⃣ Round 1 — ${check("level1", a1)}<br>
+        <small>Ans: ${a1 || "-"}</small><br>
         <small>Time: ${s.level1?.timeTaken || 0}s</small><br><br>
 
-        2️⃣ Round 2 — ${check("level2", s.level2?.response)}<br>
-        <small>Ans: ${s.level2?.response || "-"}</small><br>
+        2️⃣ Round 2 — ${check("level2", a2)}<br>
+        <small>Ans: ${a2 || "-"}</small><br>
         <small>Time: ${s.level2?.timeTaken || 0}s</small><br><br>
 
-        3️⃣ Round 3 — ${check("level3", s.level3?.response)}<br>
-        <small>Ans: ${s.level3?.response || "-"}</small><br>
+        3️⃣ Round 3 — ${check("level3", a3)}<br>
+        <small>Ans: ${a3 || "-"}</small><br>
         <small>Time: ${s.level3?.timeTaken || 0}s</small><br><br>
 
-        4️⃣ Round 4 — ${check("level4", s.level4?.response)}<br>
-        <small>Ans: ${s.level4?.response || "-"}</small><br>
+        4️⃣ Round 4 — ${check("level4", a4)}<br>
+        <small>Ans: ${a4 || "-"}</small><br>
         <small>Time: ${s.level4?.timeTaken || 0}s</small>
       `;
 
       popup.style.display = "flex";
     }
 
-/* ---------------- BEAUTIFUL PDF EXPORT (FULL LIST ONLY) ---------------- */
-document.getElementById("downloadPDF").onclick = () => generatePDF();
+    document.getElementById("downloadPDF").onclick = ()=> generatePDF();
 
-function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "pt",
-    format: "A4"
-  });
+    function generatePDF(){
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation:"portrait",
+        unit:"pt",
+        format:"A4"
+      });
 
-  const pageWidth = pdf.internal.pageSize.width;
+      const pageWidth = pdf.internal.pageSize.width;
 
-  /* ===== HEADER ===== */
-  pdf.setFillColor(139, 106, 175); // HackHER purple
-  pdf.rect(0, 0, pageWidth, 70, "F");
+      pdf.setFillColor(139,106,175);
+      pdf.rect(0,0,pageWidth,70,"F");
 
-  pdf.setFont("courier", "bold");
-  pdf.setFontSize(22);
-  pdf.setTextColor(255, 255, 255);
-  pdf.text("HackHER — Morse Quest Leaderboard", 40, 42);
+      pdf.setFont("courier","bold");
+      pdf.setFontSize(22);
+      pdf.setTextColor(255,255,255);
+      pdf.text("HackHER — Morse Quest Leaderboard",40,42);
 
-  /* ===== FULL LEADERBOARD TABLE ===== */
-  const tableBody = FINAL_LIST.map((p, i) => [
-    i + 1,
-    p.name,
-    p.email,
-    p.phone,
-    p.score,
-    `${p.time}s`
-  ]);
+      const tableBody = FINAL_LIST.map((p,i)=>[
+        i+1,
+        p.name,
+        p.email,
+        p.phone,
+        p.score,
+        `${p.time}s`
+      ]);
 
-  pdf.autoTable({
-    head: [["Rank", "Name", "Email", "Phone", "Score", "Time"]],
-    body: tableBody,
-    startY: 100,   // starts directly after header
-    theme: "grid",
-    headStyles: {
-      fillColor: [139, 106, 175],
-      textColor: [255, 255, 255],
-      fontSize: 12,
-      fontStyle: "bold"
-    },
-    styles: {
-      font: "courier",
-      cellPadding: 6,
-      fontSize: 10,
-      lineColor: [200, 190, 230],
-      lineWidth: 0.6,
-    },
-    alternateRowStyles: { fillColor: [245, 240, 255] }
-  });
+      pdf.autoTable({
+        head:[["Rank","Name","Email","Phone","Score","Time"]],
+        body:tableBody,
+        startY:100,
+        theme:"grid",
+        headStyles:{
+          fillColor:[139,106,175],
+          textColor:[255,255,255],
+          fontSize:12
+        },
+        styles:{
+          font:"courier",
+          fontSize:10,
+          cellPadding:6
+        },
+        alternateRowStyles:{ fillColor:[245,240,255] }
+      });
 
-  /* ===== FOOTER ===== */
-  pdf.setFontSize(10);
-  pdf.setTextColor(130, 130, 130);
-  pdf.text(
-    `Generated on ${new Date().toLocaleString()}`,
-    40,
-    pdf.internal.pageSize.height - 20
-  );
+      pdf.setFontSize(10);
+      pdf.setTextColor(130,130,130);
+      pdf.text(
+        `Generated on ${new Date().toLocaleString()}`,
+        40,
+        pdf.internal.pageSize.height - 20
+      );
 
-  pdf.save("MorseQuest_Leaderboard.pdf");
-}
+      pdf.save("MorseQuest_Leaderboard.pdf");
+    }
 
-loadLeaderboard();
-
+    loadLeaderboard();
   </script>
 
 </body>
