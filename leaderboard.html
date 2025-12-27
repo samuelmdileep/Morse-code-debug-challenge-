@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Leaderboard | Morse Quest</title>
-  <link rel="icon" type="image/png" href="hackher 1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link rel="icon" type="image/png" href="../hackher 1.png">
 
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
@@ -46,7 +48,6 @@
       margin-bottom:30px;
     }
 
-    /* TABLE CONTAINER */
     .table-box{
       background:var(--bg);
       border:1px solid var(--border);
@@ -81,7 +82,6 @@
       text-decoration:underline;
     }
 
-    /* PDF Button */
     .download-wrapper{
       display:flex;
       justify-content:center;
@@ -104,7 +104,7 @@
       background:var(--purple); color:#fff;
     }
 
-    /* ---------------- POPUP ---------------- */
+    /* POPUP */
     #popup{
       position:fixed;
       inset:0;
@@ -164,7 +164,6 @@
 
 <body>
 
-  <!-- HEADER -->
   <header class="hackher-header">
     <img src="../hackher 1.png">
   </header>
@@ -185,9 +184,7 @@
           </tr>
         </thead>
 
-        <tbody id="leaderboardBody">
-          <!-- Filled by JS -->
-        </tbody>
+        <tbody id="leaderboardBody"></tbody>
       </table>
 
       <div class="download-wrapper">
@@ -214,203 +211,187 @@
   <!-- FIREBASE LOGIC -->
   <script type="module">
     import { db } from "../firebase.js";
-    import { collection, getDocs, doc, getDoc } 
+    import { collection, getDocs, doc, getDoc }
       from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     const tbody = document.getElementById("leaderboardBody");
     const popup = document.getElementById("popup");
 
+    const CORRECT = {
+      level1: "D",
+      level2: "POWER",
+      level3: "SHE",
+      level4: "DATA"
+    };
+
+    function check(round, val){
+      if(!val) return "Not Attempted ❌";
+      return val.toUpperCase().trim() === CORRECT[round]
+        ? "Correct ✅"
+        : "Wrong ❌";
+    }
+
     let FINAL_LIST = [];
 
     async function loadLeaderboard(){
       const scoreDocs = await getDocs(collection(db, "scores"));
-
       let list = [];
 
-      for (const snap of scoreDocs.docs){
-        const scoreData = snap.data();
-        const userRef = doc(db, "users", snap.id);
+      for(const snap of scoreDocs.docs){
+        const s = snap.data();
+
+        const userRef = doc(db,"users",snap.id);
         const userSnap = await getDoc(userRef);
+        const u = userSnap.exists() ? userSnap.data() : {};
 
-        const user = userSnap.exists() ? userSnap.data() : {};
+        const totalScore = s.finalScore || 0;
 
-        const totalScore =
-          (scoreData.level1?.score || 0) +
-          (scoreData.level2?.score || 0) +
-          (scoreData.level3?.score || 0) +
-          (scoreData.level4?.score || 0);
 
         const totalTime =
-          (scoreData.level1?.timeTaken || 999) +
-          (scoreData.level2?.timeTaken || 999) +
-          (scoreData.level3?.timeTaken || 999) +
-          (scoreData.level4?.timeTaken || 999);
+          (s.level1?.timeTaken || 999) +
+          (s.level2?.timeTaken || 999) +
+          (s.level3?.timeTaken || 999) +
+          (s.level4?.timeTaken || 999);
 
         list.push({
           id: snap.id,
-          name: user.name || "Unknown",
-          email: user.email || "No email",
-          phone: user.phone || "No phone",
+          name: u.name || "Unknown",
+          email: u.email || "",
+          phone: u.phone || "",
           score: totalScore,
           time: totalTime,
-          fullScore: scoreData
+          full: s
         });
       }
 
-      // Sort by score → time
       list.sort((a,b)=>{
         if(a.score !== b.score) return b.score - a.score;
         return a.time - b.time;
       });
 
-      FINAL_LIST = list;  // store globally for pdf & popup
-
-      let rank = 1;
+      FINAL_LIST = list;
       tbody.innerHTML = "";
 
-      list.forEach(p=>{
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${rank}</td>
-          <td><span class="name-btn" data-id="${p.id}">${p.name}</span></td>
-          <td>${p.score}</td>
-          <td>${p.time}s</td>
+      let rank = 1;
+      list.forEach(u=>{
+        tbody.innerHTML += `
+          <tr>
+            <td>${rank}</td>
+            <td><span class="name-btn" data-id="${u.id}">${u.name}</span></td>
+            <td>${u.score}</td>
+            <td>${u.time}s</td>
+          </tr>
         `;
-
-        tbody.appendChild(tr);
         rank++;
       });
 
-      document.querySelectorAll(".name-btn").forEach(btn=>{
-        btn.onclick = ()=> showPopup(btn.dataset.id);
+      document.querySelectorAll(".name-btn").forEach(b=>{
+        b.onclick = ()=> showPopup(b.dataset.id);
       });
     }
 
     function showPopup(uid){
-      const user = FINAL_LIST.find(x => x.id === uid);
+      const x = FINAL_LIST.find(a=>a.id === uid);
+      const s = x.full;
 
-      document.getElementById("pName").innerText = user.name;
+      document.getElementById("pName").innerText = x.name;
 
       document.getElementById("pDetails").innerHTML = `
-        <b>Email:</b> ${user.email}<br>
-        <b>Phone:</b> ${user.phone}<br><br>
+        <b>Email:</b> ${x.email}<br>
+        <b>Phone:</b> ${x.phone}<br><br>
 
-        <b>Total Score:</b> ${user.score} / 4<br>
-        <b>Total Time:</b> ${user.time}s<br><br>
+        <b>Total Score:</b> ${x.score} / 4<br>
+        <b>Total Time:</b> ${x.time}s<br><br>
 
-        <b>Round Breakdown:</b><br>
-        1️⃣ ${user.fullScore.level1?.score || 0} pts (${user.fullScore.level1?.timeTaken || 0}s)<br>
-        2️⃣ ${user.fullScore.level2?.score || 0} pts (${user.fullScore.level2?.timeTaken || 0}s)<br>
-        3️⃣ ${user.fullScore.level3?.score || 0} pts (${user.fullScore.level3?.timeTaken || 0}s)<br>
-        4️⃣ ${user.fullScore.level4?.score || 0} pts (${user.fullScore.level4?.timeTaken || 0}s)
+        <b>Round Breakdown:</b><br><br>
+
+        1️⃣ Round 1 — ${check("level1", s.level1?.response)}<br>
+        <small>Ans: ${s.level1?.response || "-"}</small><br>
+        <small>Time: ${s.level1?.timeTaken || 0}s</small><br><br>
+
+        2️⃣ Round 2 — ${check("level2", s.level2?.response)}<br>
+        <small>Ans: ${s.level2?.response || "-"}</small><br>
+        <small>Time: ${s.level2?.timeTaken || 0}s</small><br><br>
+
+        3️⃣ Round 3 — ${check("level3", s.level3?.response)}<br>
+        <small>Ans: ${s.level3?.response || "-"}</small><br>
+        <small>Time: ${s.level3?.timeTaken || 0}s</small><br><br>
+
+        4️⃣ Round 4 — ${check("level4", s.level4?.response)}<br>
+        <small>Ans: ${s.level4?.response || "-"}</small><br>
+        <small>Time: ${s.level4?.timeTaken || 0}s</small>
       `;
 
       popup.style.display = "flex";
     }
 
-    /* ---------------- PDF DOWNLOAD ---------------- */
-document.getElementById("downloadPDF").onclick = () => downloadPDF();
+/* ---------------- BEAUTIFUL PDF EXPORT (FULL LIST ONLY) ---------------- */
+document.getElementById("downloadPDF").onclick = () => generatePDF();
 
-async function downloadPDF() {
-
+function generatePDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({
+  const pdf = new jsPDF({
     orientation: "portrait",
     unit: "pt",
     format: "A4"
   });
 
-  /* =============================
-     HEADER
-     ============================= */
-  doc.setFillColor(139, 106, 175);
-  doc.rect(0, 0, doc.internal.pageSize.width, 70, "F");
+  const pageWidth = pdf.internal.pageSize.width;
 
-  doc.setFont("courier", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(255, 255, 255);
-  doc.text("HackHER - Morse Quest Leaderboard", 40, 42);
+  /* ===== HEADER ===== */
+  pdf.setFillColor(139, 106, 175); // HackHER purple
+  pdf.rect(0, 0, pageWidth, 70, "F");
 
-  /* =============================
-     WINNERS BOX (with border + shadow)
-     ============================= */
-  const cardX = 40;
-  const cardY = 90;
-  const cardWidth = doc.internal.pageSize.width - 80;
-  const cardHeight = 120;
+  pdf.setFont("courier", "bold");
+  pdf.setFontSize(22);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text("HackHER — Morse Quest Leaderboard", 40, 42);
 
-  // Shadow
-  doc.setFillColor(230, 230, 240);
-  doc.roundedRect(cardX + 3, cardY + 3, cardWidth, cardHeight, 12, 12, "F");
-
-  // Main box
-  doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(200, 190, 230);
-  doc.setLineWidth(1.2);
-  doc.roundedRect(cardX, cardY, cardWidth, cardHeight, 12, 12, "FD");
-
-  // Title
-  doc.setFont("courier", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(60, 60, 60);
-  doc.text("Top 3 Winners", cardX + 20, cardY + 30);
-
-  // Data
-  doc.setFont("courier", "normal");
-  doc.setFontSize(12);
-  doc.setTextColor(80, 80, 80);
-
-  for (let i = 0; i < Math.min(3, FINAL_LIST.length); i++) {
-    const p = FINAL_LIST[i];
-    const y = cardY + 60 + (i * 20);
-
-    doc.text(`${i + 1}. ${p.name}`, cardX + 20, y);
-    doc.text(`${p.email}`, cardX + 200, y);
-    doc.text(`${p.phone}`, cardX + 400, y);
-  }
-
-  /* =============================
-     TABLE
-     ============================= */
-  const tableData = FINAL_LIST.map((p, i) => [
+  /* ===== FULL LEADERBOARD TABLE ===== */
+  const tableBody = FINAL_LIST.map((p, i) => [
     i + 1,
     p.name,
+    p.email,
+    p.phone,
     p.score,
     `${p.time}s`
   ]);
 
-  doc.autoTable({
-    head: [["Rank", "Name", "Score", "Time"]],
-    body: tableData,
-    startY: cardY + cardHeight + 40,
+  pdf.autoTable({
+    head: [["Rank", "Name", "Email", "Phone", "Score", "Time"]],
+    body: tableBody,
+    startY: 100,   // starts directly after header
     theme: "grid",
-    styles: {
-      font: "courier",
-      fontSize: 12,
-      cellPadding: 8,
-      lineColor: [210, 200, 230],
-      lineWidth: 0.7
-    },
     headStyles: {
       fillColor: [139, 106, 175],
       textColor: [255, 255, 255],
-      halign: "center",
+      fontSize: 12,
       fontStyle: "bold"
+    },
+    styles: {
+      font: "courier",
+      cellPadding: 6,
+      fontSize: 10,
+      lineColor: [200, 190, 230],
+      lineWidth: 0.6,
     },
     alternateRowStyles: { fillColor: [245, 240, 255] }
   });
 
-  /* FOOTER */
-  const date = new Date().toLocaleString();
-  doc.setFontSize(10);
-  doc.setTextColor(120, 120, 120);
-  doc.text(`Generated on: ${date}`, 40, doc.internal.pageSize.height - 30);
+  /* ===== FOOTER ===== */
+  pdf.setFontSize(10);
+  pdf.setTextColor(130, 130, 130);
+  pdf.text(
+    `Generated on ${new Date().toLocaleString()}`,
+    40,
+    pdf.internal.pageSize.height - 20
+  );
 
-  doc.save("MorseQuest_Leaderboard.pdf");
+  pdf.save("MorseQuest_Leaderboard.pdf");
 }
 
-    loadLeaderboard();
+loadLeaderboard();
+
   </script>
 
 </body>
