@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
   <title>Completed | Morse Quest</title>
   <link rel="icon" type="image/png" href="hackher 1.png">
 
@@ -14,25 +16,18 @@
       --text:#6A5A7A;
       --border:#DBCDF0;
       --green:#5A8A7A;
-      --bg1:#FDFCFA; --bg2:#FAEDCB; --bg3:#F2C6DE; --bg4:#DBCDF0; --bg5:#C6DEF1;
     }
 
     body{
       margin:0;
       font-family:"Space Mono",monospace;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
+      background:linear-gradient(180deg,#FDFCFA,#FAEDCB,#F2C6DE,#DBCDF0,#C6DEF1);
       color:var(--text);
       overflow-x:hidden;
     }
 
-    .header{
-      text-align:center;
-      padding:40px 20px 10px;
-    }
-
-    .header img{
-      height:70px;
-    }
+    .header{ text-align:center; padding:40px 20px 10px; }
+    .header img{ height:70px; }
 
     .box{
       max-width:600px;
@@ -45,58 +40,31 @@
       box-shadow:0 12px 25px rgba(0,0,0,0.06);
     }
 
-    h2{
-      color:var(--purple);
-      font-size:32px;
-      margin-bottom:10px;
-    }
+    h2{ color:var(--purple); font-size:32px; margin-bottom:10px; }
 
     .score-box{
-      font-size:26px;
-      font-weight:700;
-      color:var(--green);
-      margin-top:20px;
-      margin-bottom:10px;
+      font-size:26px; font-weight:700; color:var(--green);
+      margin-top:20px; margin-bottom:10px;
     }
 
-    .note{
-      margin-top:15px;
-      font-size:17px;
-      color:var(--text);
-      line-height:1.5;
-    }
-
-    .footer{
-      margin-top:40px;
-      text-align:center;
-      font-size:15px;
-      opacity:0.7;
-    }
+    .note{ margin-top:15px; font-size:17px; line-height:1.5; }
 
     .btn{
-      margin-top:25px;
-      width:100%;
-      padding:14px;
-      background:#fff;
-      border:2px solid var(--purple);
-      color:var(--purple);
-      font-size:18px;
-      font-weight:700;
-      border-radius:12px;
-      cursor:pointer;
-      transition:.2s;
+      margin-top:25px; width:100%; padding:14px;
+      background:#fff; border:2px solid var(--purple);
+      color:var(--purple); font-size:18px; font-weight:700;
+      border-radius:12px; cursor:pointer; transition:.2s;
     }
-    .btn:hover{
-      background:var(--purple);
-      color:#fff;
-    }
+    .btn:hover{ background:var(--purple); color:#fff; }
+
+    .footer{ margin-top:40px; text-align:center; opacity:0.7; }
   </style>
 </head>
 
 <body>
 
 <div class="header">
-  <img src="hackher 1.png" alt="HackHER Logo">
+  <img src="hackher 1.png">
 </div>
 
 <div class="box">
@@ -104,17 +72,14 @@
   <p>You have completed all rounds of <strong>Morse Quest</strong>.</p>
 
   <div class="score-box">
-    You got <span id="totalCorrect">--</span> out of 4 correct
+    You got <span id="totalCorrect">--</span> / 4 correct
   </div>
 
   <p class="note">
-    Your responses and completion time have been successfully recorded.<br><br>
-    Winners will be selected based on:<br>
-    • Accuracy (Score) + Time Taken (Speed)<br><br>
-    Stay tuned for the official results!
+    Your responses and completion time have been recorded.
+    Winners are based on Score + Speed.
   </p>
 
-  <!-- OFFICIAL HACKHER PAGE BUTTON -->
   <button class="btn" onclick="window.location.href='https://hackher.ieeemace.org/';">
     ↗ Go to HackHER Official Page
   </button>
@@ -128,38 +93,53 @@
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged } from 
     "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-  import { doc, getDoc } from 
+  import { doc, getDoc, setDoc } from 
     "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  // 🚫 Disable back button completely
-  history.pushState(null, "", location.href);
-  window.addEventListener("popstate", () => {
-    history.pushState(null, "", location.href);
+  // Prevent back
+  history.pushState(null,"",location.href);
+  window.addEventListener("popstate",()=>history.pushState(null,"",location.href));
+
+  // Disable refresh
+  document.addEventListener("keydown",e=>{
+    if(e.key==="F5" || (e.ctrlKey&&e.key==="r")) e.preventDefault();
   });
 
-  // 🚫 Disable refresh keys
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "F5" || (e.ctrlKey && e.key === "r") || (e.metaKey && e.key === "r")) {
-      e.preventDefault();
-    }
-  });
-
-  // Load user score
+  /* ---------------- FINAL SCORE EVALUATION ---------------- */
   onAuthStateChanged(auth, async(user)=>{
     if(!user) return;
 
     const ref = doc(db,"scores",user.uid);
     const snap = await getDoc(ref);
-
     if(!snap.exists()) return;
 
     const d = snap.data();
 
-    let total =
-      (d.level1?.score || 0) +
-      (d.level2?.score || 0) +
-      (d.level3?.score || 0) +
-      (d.level4?.score || 0);
+    // ⭐ READ EXACT FIELD NAMES FROM FIREBASE
+    const userAns = {
+      level1: d.level1?.response || "",
+      level2: d.level2?.response || "",
+      level3: d.level3?.response || "",
+      level4: d.level4?.response || ""
+    };
+
+    // Correct answers
+    const correct = {
+      level1: "D",
+      level2: "POWER",
+      level3: "SHE",
+      level4: "DATA"
+    };
+
+    let total = 0;
+
+    if(userAns.level1.toUpperCase() === correct.level1) total++;
+    if(userAns.level2.toUpperCase() === correct.level2) total++;
+    if(userAns.level3.toUpperCase() === correct.level3) total++;
+    if(userAns.level4.toUpperCase() === correct.level4) total++;
+
+    // Save final score
+    await setDoc(ref,{ finalScore: total, evaluatedAt: Date.now() },{ merge:true });
 
     document.getElementById("totalCorrect").innerText = total;
   });
